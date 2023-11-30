@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <string.h>
 #include <sys/time.h>
 #include "cuda.h"
 #include "cuda_runtime.h"
@@ -34,16 +35,20 @@ __global__ void fnvKernel(Block* block) {
 
 
 void printBlock(Block block) {
-    printf("+------------------+\n");
-    printf("|    0x%x    |\n", block.prevHash);
-    printf("|------------------|\n");
-    printf("| %.16s |\n", block.text);
-    printf("| %.13s... |\n", block.text+16);
-    printf("|------------------|\n");
+    int len = snprintf(NULL, 0, "%d", block.blockHash);
+    int spaces = (23 - len) / 2;
+
+    printf("+---------------------+\n");
+    printf("|      0x%x      |\n", block.prevHash);
+    printf("|---------------------|\n");
+    printf("| %.15s... |\n", block.text);
+    printf("| %.15s... |\n", block.text+16);
+    printf("|---------------------|\n");
     printf("| %d |\n", block.nonce);
-    printf("|------------------|\n");
-    printf("|    0x%x    |\n", block.blockHash);
-    printf("+------------------+\n");
+    printf("|---------------------|\n");
+    printf("|%*s0x%x%*s|\n", spaces, "", block.blockHash, spaces, "");
+    printf("+---------------------+\n");
+    printf("\n\n");
 }
 
 
@@ -53,14 +58,11 @@ int main(int argc, char *argv[]) {
     uint32_t prevBlockHash = 0;
     Block *currentBlock, *deviceBlock;
 
-    printf("Hola0\n");
-
     if (argc < 2) {
         printf("Usage: %s <text file> \n", argv[0]);
         return -1;
     }
 
-    printf("Hola\n");
     const char* fileName = argv[1];
     FILE* file = fopen(fileName, "r");
 
@@ -77,7 +79,6 @@ int main(int argc, char *argv[]) {
     int n_blocks = (TXT_BLOCK_SIZE + fileSize - 1) / TXT_BLOCK_SIZE;
 
     for (int i=0; i < n_blocks; i++) {
-        printf("Hola1 n blocks: %d\n\n\n", n_blocks);
         // Leer el contenido de parte del archivo a una cadena en la memoria del host
         //fread(fileData, sizeof(char), TXT_BLOCK_SIZE, file + n_blocks*TXT_BLOCK_SIZE);
 
@@ -91,21 +92,17 @@ int main(int argc, char *argv[]) {
         // Crear el bloque a procesar en la memoria del Host
         currentBlock = (Block*) malloc(sizeof(Block));
         currentBlock->prevHash = prevBlockHash;
-        printf("Hola2\n\n\n");
         memcpy(currentBlock->text, fileData, TXT_BLOCK_SIZE);
         currentBlock->nonce = 0;
         currentBlock->blockHash = 0;
 
-        printf("Hola3\n\n\n");
 
         // Copiar el bloque a la memoria del Device
         cudaMalloc((void**) &deviceBlock, sizeof(Block));
         cudaMemcpy(deviceBlock, currentBlock, sizeof(Block), cudaMemcpyHostToDevice);
-        printf("Hola4\n\n\n");
         
         // Lanza el kernel
         fnvKernel<<<1, 1>>>(deviceBlock);
-        printf("Hola5\n\n\n");
 
         // Copiar el bloque minado del Device al Host
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
