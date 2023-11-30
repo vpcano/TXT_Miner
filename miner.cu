@@ -79,7 +79,14 @@ int main(int argc, char *argv[]) {
     for (int i=0; i < n_blocks; i++) {
         printf("Hola1 n blocks: %d\n\n\n", n_blocks);
         // Leer el contenido de parte del archivo a una cadena en la memoria del host
-        fread(fileData, sizeof(char), TXT_BLOCK_SIZE, file + n_blocks*TXT_BLOCK_SIZE);
+        //fread(fileData, sizeof(char), TXT_BLOCK_SIZE, file + n_blocks*TXT_BLOCK_SIZE);
+
+
+        // Calcular el tamaño del bloque actual
+        size_t blockSize = (i == n_blocks - 1) ? (fileSize % TXT_BLOCK_SIZE) : TXT_BLOCK_SIZE;
+
+        // Leer el contenido del bloque actual
+        fread(fileData, sizeof(char), blockSize, file);
 
         // Crear el bloque a procesar en la memoria del Host
         currentBlock = (Block*) malloc(sizeof(Block));
@@ -107,6 +114,8 @@ int main(int argc, char *argv[]) {
         printBlock(*currentBlock);
         prevBlockHash = currentBlock->blockHash;
         free(currentBlock);
+
+        fseek(file, TXT_BLOCK_SIZE, SEEK_CUR);
     }
 
     fclose(file);
