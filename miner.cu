@@ -40,7 +40,7 @@ void printBlock(Block block) {
 
     printf("+---------------------+\n");
     printf("|     0x%08x      |\n", block.prevHash);
-    printf("|---------------------|\n|");
+    printf("|---------------------|\n| ");
     int i = 0;
     while (block.text[i] == ' ') i++;
     for (int j=0; i<strlen(block.text) && j<21; ++i) {
@@ -50,7 +50,7 @@ void printBlock(Block block) {
         putchar(block.text[i]);
         ++j;
     }
-    printf("\n");
+    printf(" |\n| ");
     while (block.text[i] == ' ') i++;
     for (int j=0; i<strlen(block.text) && j<21; ++i) {
         if (block.text[i] == '\n' || block.text[i] == '\r') {
@@ -59,7 +59,7 @@ void printBlock(Block block) {
         putchar(block.text[i]);
         ++j;
     }
-    printf("\n|---------------------|\n");
+    printf(" |\n|---------------------|\n");
     printf("|%*s%d%*s|\n", spaces, "", block.nonce, spaces, "");
     printf("|---------------------|\n");
     printf("|     0x%08x      |\n", block.blockHash);
