@@ -42,7 +42,7 @@ void printBlock(Block block) {
     printf("|      0x%x      |\n", block.prevHash);
     printf("|---------------------|\n");
     printf("| %.15s... |\n", block.text);
-    printf("| %.15s... |\n", strchr(block.text, '\n') + 1));
+    printf("| %.15s... |\n", strchr(block.text, '\n') + 1);
     printf("|---------------------|\n");
     printf("| %d |\n", block.nonce);
     printf("|---------------------|\n");
