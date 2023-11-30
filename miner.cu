@@ -39,7 +39,7 @@ void printBlock(Block block) {
     int spaces = (21 - len) / 2;
 
     char *first_line = block.text;
-    while (*first_line == '\n') firstline++;
+    while (*first_line == '\n') first_line++;
     char *second_line = strchr(first_line, '\n') + 1;
     while (*second_line == '\n') second_line++;
 
