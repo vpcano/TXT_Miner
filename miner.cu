@@ -53,6 +53,8 @@ int main(int argc, char *argv[]) {
     uint32_t prevBlockHash = 0;
     Block *currentBlock, *deviceBlock;
 
+    printf("Hola0\n");
+
     if (argc < 2) {
         printf("Usage: %s <text file> \n", argv[0]);
         return -1;
