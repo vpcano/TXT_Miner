@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    printf("Hola");
     const char* fileName = argv[1];
     FILE* file = fopen(fileName, "r");
 
