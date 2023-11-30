@@ -76,24 +76,29 @@ int main(int argc, char *argv[]) {
 
     int n_blocks = (TXT_BLOCK_SIZE + fileSize - 1) / TXT_BLOCK_SIZE;
 
-    printf("Hola1\n\n\n");
     for (int i=0; i < n_blocks; i++) {
+        printf("Hola1\n\n\n");
         // Leer el contenido de parte del archivo a una cadena en la memoria del host
         fread(fileData, sizeof(char), TXT_BLOCK_SIZE, file + n_blocks*TXT_BLOCK_SIZE);
 
         // Crear el bloque a procesar en la memoria del Host
         currentBlock = (Block*) malloc(sizeof(Block));
         currentBlock->prevHash = prevBlockHash;
+        printf("Hola2\n\n\n");
         memcpy(currentBlock->text, fileData, TXT_BLOCK_SIZE);
         currentBlock->nonce = 0;
         currentBlock->blockHash = 0;
 
+        printf("Hola3\n\n\n");
+
         // Copiar el bloque a la memoria del Device
         cudaMalloc((void**) &deviceBlock, sizeof(Block));
         cudaMemcpy(deviceBlock, currentBlock, sizeof(Block), cudaMemcpyHostToDevice);
+        printf("Hola4\n\n\n");
         
         // Lanza el kernel
         fnvKernel<<<1, 1>>>(deviceBlock);
+        printf("Hola5\n\n\n");
 
         // Copiar el bloque minado del Device al Host
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
