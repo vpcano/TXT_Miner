@@ -42,21 +42,21 @@ void printBlock(Block block) {
     printf("|     0x%08x      |\n", block.prevHash);
     printf("|---------------------|\n|");
     int i = 0;
-    while (block.texto[i] == ' ') i++;
-    for (j=0; i<strlen(block.texto) && j<21; ++i) {
-        if (block.texto[i] == '\n' || block.texto[i] == '\r') {
+    while (block.text[i] == ' ') i++;
+    for (j=0; i<strlen(block.text) && j<21; ++i) {
+        if (block.text[i] == '\n' || block.text[i] == '\r') {
             continue;
         }
-        putchar(block.texto[i]);
+        putchar(block.text[i]);
         ++j;
     }
     printf("\n");
-    while (block.texto[i] == ' ') i++;
-    for (j=0; i<strlen(block.texto) && j<21; ++i) {
-        if (block.texto[i] == '\n' || block.texto[i] == '\r') {
+    while (block.text[i] == ' ') i++;
+    for (j=0; i<strlen(block.text) && j<21; ++i) {
+        if (block.text[i] == '\n' || block.text[i] == '\r') {
             continue;
         }
-        putchar(block.texto[i]);
+        putchar(block.text[i]);
         ++j;
     }
     printf("\n|---------------------|\n");
