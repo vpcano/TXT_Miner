@@ -38,11 +38,14 @@ void printBlock(Block block) {
     int len = snprintf(NULL, 0, "%d", block.blockHash);
     int spaces = (23 - len) / 2;
 
+    char *first_line = strchr(block.text, '\n') + 1;
+    char *second_line = strchr(first_line, '\n') + 1;
+
     printf("+---------------------+\n");
     printf("|      0x%x      |\n", block.prevHash);
     printf("|---------------------|\n");
-    printf("| %.15s... |\n", block.text);
-    printf("| %.15s... |\n", strchr(block.text, '\n') + 1);
+    printf("| %.15s... |\n", first_line);
+    printf("| %.15s... |\n", second_line);
     printf("|---------------------|\n");
     printf("| %d |\n", block.nonce);
     printf("|---------------------|\n");
