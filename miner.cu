@@ -38,20 +38,31 @@ void printBlock(Block block) {
     int len = snprintf(NULL, 0, "%d", block.nonce);
     int spaces = (21 - len) / 2;
 
-    char *first_line = block.text;
-    while (*first_line == '\n') first_line++;
-    char *second_line = strchr(first_line, '\n') + 1;
-    while (*second_line == '\n') second_line++;
-
     printf("+---------------------+\n");
-    printf("|     0x%x      |\n", block.prevHash);
-    printf("|---------------------|\n");
-    printf("| %.16s... |\n", first_line);
-    printf("| %.16s... |\n", second_line);
-    printf("|---------------------|\n");
+    printf("|     0x%08x      |\n", block.prevHash);
+    printf("|---------------------|\n|");
+    int i = 0;
+    while (block.texto[i] == ' ') i++;
+    for (j=0; i<strlen(block.texto) && j<21; ++i) {
+        if (block.texto[i] == '\n' || block.texto[i] == '\r') {
+            continue;
+        }
+        putchar(block.texto[i]);
+        ++j;
+    }
+    printf("\n");
+    while (block.texto[i] == ' ') i++;
+    for (j=0; i<strlen(block.texto) && j<21; ++i) {
+        if (block.texto[i] == '\n' || block.texto[i] == '\r') {
+            continue;
+        }
+        putchar(block.texto[i]);
+        ++j;
+    }
+    printf("\n|---------------------|\n");
     printf("|%*s%d%*s|\n", spaces, "", block.nonce, spaces, "");
     printf("|---------------------|\n");
-    printf("|     0x%x      |\n", block.blockHash);
+    printf("|     0x%08x      |\n", block.blockHash);
     printf("+---------------------+\n");
     printf("\n\n");
 }
