@@ -35,8 +35,8 @@ __global__ void fnvKernel(Block* block) {
 
 
 void printBlock(Block block) {
-    int len = snprintf(NULL, 0, "%d", block.blockHash);
-    int spaces = (23 - len) / 2;
+    int len = snprintf(NULL, 0, "%d", block.nonce);
+    int spaces = (21 - len) / 2;
 
     char *first_line = strchr(block.text, '\n') + 1;
     char *second_line = strchr(first_line, '\n') + 1;
@@ -44,12 +44,12 @@ void printBlock(Block block) {
     printf("+---------------------+\n");
     printf("|      0x%x      |\n", block.prevHash);
     printf("|---------------------|\n");
-    printf("| %.15s... |\n", first_line);
-    printf("| %.15s... |\n", second_line);
+    printf("| %.16s... |\n", first_line);
+    printf("| %.16s... |\n", second_line);
     printf("|---------------------|\n");
-    printf("| %d |\n", block.nonce);
+    printf("|%*s%d%*s|\n", spaces, "", block.nonce, spaces, "");
     printf("|---------------------|\n");
-    printf("|%*s0x%x%*s|\n", spaces, "", block.blockHash, spaces, "");
+    printf("|    0x%x     |\n", block.blockHash);
     printf("+---------------------+\n");
     printf("\n\n");
 }
