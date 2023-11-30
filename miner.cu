@@ -73,8 +73,8 @@ int main(int argc, char *argv[]) {
 
     int n_blocks = (TXT_BLOCK_SIZE + fileSize - 1) / TXT_BLOCK_SIZE;
 
+    printf("Hola1");
     for (int i=0; i < n_blocks; i++) {
-        printf("Hola");
         // Leer el contenido de parte del archivo a una cadena en la memoria del host
         fread(fileData, sizeof(char), TXT_BLOCK_SIZE, file + n_blocks*TXT_BLOCK_SIZE);
 
