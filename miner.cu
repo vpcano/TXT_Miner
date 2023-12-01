@@ -10,34 +10,46 @@ using namespace std;
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
 #define TARGET_DIFFICULTY 0x000000FF
+#define NUM_OF_THREADS 256
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
     char text[TXT_BLOCK_SIZE];  // Texto
-    unsigned int nonce;  // Nonce
+    uint32_t nonce;  // Nonce
     uint32_t blockHash;  // Hash del bloque (puedes ajustar la longitud según tu método de hash)
 } Block;
 
 __global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
-    int nonce = 0;
+    uint32_t nonce;
     const int blockSize = sizeof(Block) - sizeof(uint32_t);
     const char* blockPtr = (char*) block;
+    __shared__ int foundFlag;
+
+    if (threadId == 0) {
+        foundFlag = 0;
+    }
+
+    __syncthreads();
     
     unsigned int hash = OFFSET;
 
-    do {
-        // Aplica la función fnv al campo 'text' de la estructura
+    for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
+        // Aplica la función fnv al bloque
         for (int i = 0; i < blockSize; ++i) {
             hash ^= *(blockPtr + i);
             hash *= FNV_PRIME;
         }
-    } while (hash > TARGET_DIFFICULTY && ++nonce);
 
-    printf("Found hash: 0x%08x\n after %u tries\n", hash, nonce);
+        if (hash <= TARGET_DIFFICULTY) {
+            foundFlag = 1;
+            printf("Found hash: 0x%08x after %u tries\n", hash, nonce);
 
-    block->nonce = nonce;
-    block->blockHash = hash;
+            block->nonce = nonce;
+            block->blockHash = hash;
+        }
+    }
+
 }
 
 
@@ -123,7 +135,7 @@ int main(int argc, char *argv[]) {
         cudaMemcpy(deviceBlock, currentBlock, sizeof(Block), cudaMemcpyHostToDevice);
         
         // Lanza el kernel
-        fnvKernel<<<1, 1>>>(deviceBlock);
+        fnvKernel<<<1, NUM_OF_THREADS>>>(deviceBlock);
 
         // Copiar el bloque minado del Device al Host
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
