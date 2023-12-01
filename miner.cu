@@ -94,8 +94,6 @@ int main(int argc, char *argv[]) {
 
     int n_blocks = (TXT_BLOCK_SIZE + fileSize - 1) / TXT_BLOCK_SIZE;
 
-    printf("Num blocks: %d\nFile size: %d\n", n_blocks, fileSize);
-
     for (int i=0; i < n_blocks; i++) {
 
         // Calcular el tamaño del bloque actual
