@@ -54,7 +54,8 @@ __global__ void fnvKernel(Block* block) {
             block->nonce = nonce;
             block->blockHash = hash;
         }
-        
+
+        __syncthreads(); 
     }
 
 }
