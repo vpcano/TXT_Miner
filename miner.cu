@@ -10,18 +10,18 @@ using namespace std;
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
 #define TARGET_DIFFICULTY 0x000000FF
-#define NUM_OF_THREADS 256
+#define NUM_OF_THREADS 1
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
     char text[TXT_BLOCK_SIZE];  // Texto
-    int nonce;  // Nonce
+    uint32_t nonce;  // Nonce
     uint32_t blockHash;  // Hash del bloque (puedes ajustar la longitud según tu método de hash)
 } Block;
 
 __global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
-    int nonce;
+    uint32_t nonce;
     const int blockSize = sizeof(Block) - sizeof(uint32_t);
     const char* blockPtr = (char*) block;
     __shared__ int foundFlag;
@@ -34,7 +34,7 @@ __global__ void fnvKernel(Block* block) {
     
     unsigned int hash = OFFSET;
 
-    for (nonce=threadId; !foundFlag; nonce+=NUM_OF_THREADS) {
+    for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
         // Aplica la función fnv al bloque
         for (int i = 0; i < blockSize; ++i) {
             hash ^= *(blockPtr + i);
