@@ -9,7 +9,7 @@ using namespace std;
 #define TXT_BLOCK_SIZE 128
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
-#define TARGET_DIFFICULTY 0x000FFFFF
+#define TARGET_DIFFICULTY 0x000000FF
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -34,7 +34,7 @@ __global__ void fnvKernel(Block* block) {
         }
     } while (hash > TARGET_DIFFICULTY && ++nonce);
 
-    printf("Found hash: %08x\n after %u tries\n", hash, nonce);
+    printf("Found hash: 0x%08x\n after %u tries\n", hash, nonce);
 
     block->nonce = nonce;
     block->blockHash = hash;
