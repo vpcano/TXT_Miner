@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
         prevBlockHash = currentBlock->blockHash;
         free(currentBlock);
 
-        fseek(file, TXT_BLOCK_SIZE, SEEK_CUR);
+        //fseek(file, TXT_BLOCK_SIZE, SEEK_CUR);
     }
 
     fclose(file);
