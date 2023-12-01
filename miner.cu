@@ -29,7 +29,7 @@ __global__ void fnvKernel(Block* block) {
         printf("Trying nonce %d\n", nonce);
         // Aplica la función fnv al campo 'text' de la estructura
         for (int i = 0; i < blockSize; ++i) {
-            hash ^= (int) (block[i]);
+            hash ^= (int) *(block + i);
             hash *= FNV_PRIME;
         }
         printf("Hash: %d\n\n", hash);
