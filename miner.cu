@@ -33,7 +33,7 @@ __global__ void fnvKernel(Block* block) {
             hash ^= *(blockPtr + i);
             hash *= FNV_PRIME;
         }
-        printf("Hash: %d\n\n", hash);
+        printf("Hash: %u\n\n", hash);
     } while (hash > TARGET_DIFFICULTY && ++nonce);
 
     block->nonce = nonce;
