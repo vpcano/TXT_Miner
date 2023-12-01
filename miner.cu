@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
         cudaFree(deviceBlock);
         
         //printBlock(*currentBlock);
-        print("%s\n\n", currentBlock->text);
+        printf("%s\n\n", currentBlock->text);
         prevBlockHash = currentBlock->blockHash;
         free(currentBlock);
 
