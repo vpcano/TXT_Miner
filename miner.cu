@@ -9,7 +9,7 @@ using namespace std;
 #define TXT_BLOCK_SIZE 128
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
-#define TARGET_DIFFICULTY 0x000000FF
+#define TARGET_DIFFICULTY 0x000FFFFF
 #define NUM_OF_THREADS 1
 
 typedef struct {
@@ -32,9 +32,11 @@ __global__ void fnvKernel(Block* block) {
 
     __syncthreads();
     
-    unsigned int hash = OFFSET;
 
     for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
+        unsigned int hash = OFFSET;
+        block->nonce = nonce;
+
         // Aplica la función fnv al bloque
         for (int i = 0; i < blockSize; ++i) {
             hash ^= *(blockPtr + i);
@@ -45,9 +47,9 @@ __global__ void fnvKernel(Block* block) {
             foundFlag = 1;
             printf("Found hash: 0x%08x after %u tries\n", hash, nonce);
 
-            block->nonce = nonce;
             block->blockHash = hash;
         }
+        
     }
 
 }
