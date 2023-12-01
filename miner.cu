@@ -7,10 +7,9 @@
 using namespace std;
 
 #define TXT_BLOCK_SIZE 128
-#define PRIME  1000000007
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
-#define TARGET_DIFFICULTY (int) 0.8*PRIME
+#define TARGET_DIFFICULTY 0x00FFFFFF
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -19,21 +18,20 @@ typedef struct {
     uint32_t blockHash;  // Hash del bloque (puedes ajustar la longitud según tu método de hash)
 } Block;
 
-__global__ void fnvKernel(Block* block, size_t blockSize) {
+__global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
     int nonce = 0;
+    const int blockSize = sizeof(Block) - sizeof(uint32_t);
     
     unsigned int hash = OFFSET;
-    printf("Target difficulty: %d\n", TARGET_DIFFICULTY);
 
     do {
         printf("Trying nonce %d\n", nonce);
         // Aplica la función fnv al campo 'text' de la estructura
         for (int i = 0; i < blockSize; ++i) {
-            hash ^= static_cast<unsigned int>(block->text[i]);
+            hash ^= (int) (block[i]);
             hash *= FNV_PRIME;
         }
-        hash %= PRIME;
         printf("Hash: %d\n\n", hash);
     } while (hash > TARGET_DIFFICULTY && ++nonce);
 
@@ -124,7 +122,7 @@ int main(int argc, char *argv[]) {
         cudaMemcpy(deviceBlock, currentBlock, sizeof(Block), cudaMemcpyHostToDevice);
         
         // Lanza el kernel
-        fnvKernel<<<1, 1>>>(deviceBlock, blockSize);
+        fnvKernel<<<1, 1>>>(deviceBlock);
 
         // Copiar el bloque minado del Device al Host
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
