@@ -10,7 +10,7 @@ using namespace std;
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
 #define TARGET_DIFFICULTY 0x00000FFF
-#define NUM_OF_THREADS 1
+#define NUM_OF_THREADS 64
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -150,14 +150,15 @@ int main(int argc, char *argv[]) {
 
         printBlock(*currentBlock);
 
-        // Aplica la función fnv a la primera parte del bloque
-        char *blockPtr = (char*) currentBlock;
+        // Check hash has been calculated correctly
+        /*
         uint32_t hash = OFFSET;
-        for (int i = 0; i < sizeof(Block) - sizeof(uint32_t); ++i) {
-            hash ^= *(blockPtr + i);
+        for (size_t i = 0; i < sizeof(Block) - sizeof(uint32_t); ++i) {
+            hash ^= *((char*)currentBlock + i);
             hash *= FNV_PRIME;
         }
         printf("Check hash: 0x%08x\n", hash);
+        */
 
         prevBlockHash = currentBlock->blockHash;
         free(currentBlock);
