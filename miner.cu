@@ -49,7 +49,7 @@ __global__ void fnvKernel(Block* block) {
 
         if (hash <= TARGET_DIFFICULTY) {
             foundFlag = 1;
-            printf("Found hash: 0x%08x with nonce %u\n", hash, nonce);
+            printf("Soy el hilo %d y he encontrado esto. Found hash: 0x%08x with nonce %u\n", threadId, hash, nonce);
 
             block->nonce = nonce;
             block->blockHash = hash;
