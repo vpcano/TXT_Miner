@@ -10,7 +10,7 @@ using namespace std;
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
 #define TARGET_DIFFICULTY 0x00000FFF
-#define NUM_OF_THREADS 256
+#define NUM_OF_THREADS 1
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -42,7 +42,7 @@ __global__ void fnvKernel(Block* block) {
             hash *= FNV_PRIME;
         }
 
-        // Hasheo de los bytes de la variable int nonce
+        // Hasheo de los bytes del nonce
         new_nonce = nonce;
         for (size_t i = 0; i < sizeof(int); ++i) {
             hash ^= (uint8_t)(new_nonce & 0xFF);
@@ -52,7 +52,7 @@ __global__ void fnvKernel(Block* block) {
 
         if (hash <= TARGET_DIFFICULTY) {
             foundFlag = 1;
-            printf("Found hash: 0x%08x after %u tries\n", hash, nonce);
+            printf("Found hash: 0x%08x with nonce %u\n", hash, nonce);
 
             block->nonce = nonce;
             block->blockHash = hash;
