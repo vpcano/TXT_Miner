@@ -48,7 +48,7 @@ __global__ void fnvKernel(Block* block) {
         }
 
         if (hash <= TARGET_DIFFICULTY && !foundFlag) {
-            foundFlag = 1;
+            atomicExch(&foundFlag, 1);
             printf("Soy el hilo %d y he encontrado esto. Found hash: 0x%08x with nonce %u\n", threadId, hash, nonce);
 
             block->nonce = nonce;
