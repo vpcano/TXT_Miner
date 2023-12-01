@@ -18,13 +18,13 @@ typedef struct {
     uint32_t blockHash;  // Hash del bloque (puedes ajustar la longitud según tu método de hash)
 } Block;
 
-__global__ void fnvKernel(Block* block) {
+__global__ void fnvKernel(Block* block, size_t blockSize) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
     
     unsigned int hash = OFFSET;
 
     // Aplica la función fnv al campo 'text' de la estructura
-    for (int i = 0; i < TXT_BLOCK_SIZE; ++i) {
+    for (int i = 0; i < blockSize; ++i) {
         hash ^= static_cast<unsigned int>(block->text[i]);
         hash *= FNV_PRIME;
     }
@@ -97,9 +97,6 @@ int main(int argc, char *argv[]) {
     printf("Num blocks: %d\nFile size: %d\n", n_blocks, fileSize);
 
     for (int i=0; i < n_blocks; i++) {
-        // Leer el contenido de parte del archivo a una cadena en la memoria del host
-        //fread(fileData, sizeof(char), TXT_BLOCK_SIZE, file + n_blocks*TXT_BLOCK_SIZE);
-
 
         // Calcular el tamaño del bloque actual
         size_t blockSize = (i == n_blocks - 1) ? (fileSize % TXT_BLOCK_SIZE) : TXT_BLOCK_SIZE;
@@ -110,7 +107,7 @@ int main(int argc, char *argv[]) {
         // Crear el bloque a procesar en la memoria del Host
         currentBlock = (Block*) malloc(sizeof(Block));
         currentBlock->prevHash = prevBlockHash;
-        memcpy(currentBlock->text, fileData, TXT_BLOCK_SIZE);
+        memcpy(currentBlock->text, fileData, blockSize);
         currentBlock->nonce = 0;
         currentBlock->blockHash = 0;
 
@@ -120,7 +117,7 @@ int main(int argc, char *argv[]) {
         cudaMemcpy(deviceBlock, currentBlock, sizeof(Block), cudaMemcpyHostToDevice);
         
         // Lanza el kernel
-        fnvKernel<<<1, 1>>>(deviceBlock);
+        fnvKernel<<<1, 1>>>(deviceBlock, blockSize);
 
         // Copiar el bloque minado del Device al Host
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
