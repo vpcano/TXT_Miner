@@ -43,7 +43,7 @@ void printBlock(Block block) {
     printf("|---------------------|\n| ");
     int i = 0;
     while (block.text[i] == ' ') i++;
-    for (int j=0; i<strlen(block.text) && j<16; ++i) {
+    for (int j=0; i<strlen(block.text) && j<16; i++) {
         if (block.text[i] == '\n' || block.text[i] == '\r') {
             continue;
         }
@@ -52,7 +52,7 @@ void printBlock(Block block) {
     }
     printf("... |\n| ");
     while (block.text[i] == ' ') i++;
-    for (int j=0; i<strlen(block.text) && j<16; ++i) {
+    for (int j=0; i<strlen(block.text) && j<16; i++) {
         if (block.text[i] == '\n' || block.text[i] == '\r') {
             continue;
         }
