@@ -10,6 +10,7 @@ using namespace std;
 #define PRIME  1000000007
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
+#define TARGET_DIFFICULTY (int) 0.5*PRIME
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -20,16 +21,20 @@ typedef struct {
 
 __global__ void fnvKernel(Block* block, size_t blockSize) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
+    int nonce = 0;
     
     unsigned int hash = OFFSET;
 
-    // Aplica la función fnv al campo 'text' de la estructura
-    for (int i = 0; i < blockSize; ++i) {
-        hash ^= static_cast<unsigned int>(block->text[i]);
-        hash *= FNV_PRIME;
-    }
-    hash %= PRIME;
+    do {
+        // Aplica la función fnv al campo 'text' de la estructura
+        for (int i = 0; i < blockSize; ++i) {
+            hash ^= static_cast<unsigned int>(block->text[i]);
+            hash *= FNV_PRIME;
+        }
+        hash %= PRIME;
+    } while (hash > TARGET_DIFFICULTY && ++nonce);
 
+    block->nonce = nonce;
     block->blockHash = hash;
 }
 
