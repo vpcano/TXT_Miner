@@ -124,12 +124,10 @@ int main(int argc, char *argv[]) {
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
         cudaFree(deviceBlock);
         
-        //printBlock(*currentBlock);
-        printf("%s\n\n", currentBlock->text);
+        printBlock(*currentBlock);
         prevBlockHash = currentBlock->blockHash;
         free(currentBlock);
 
-        //fseek(file, TXT_BLOCK_SIZE, SEEK_CUR);
     }
 
     fclose(file);
