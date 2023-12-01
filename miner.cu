@@ -9,7 +9,7 @@ using namespace std;
 #define TXT_BLOCK_SIZE 128
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
-#define TARGET_DIFFICULTY 0x00000FFF
+#define TARGET_DIFFICULTY 0x000000FF
 #define NUM_OF_THREADS 64
 
 typedef struct {
