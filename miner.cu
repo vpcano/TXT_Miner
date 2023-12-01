@@ -10,7 +10,7 @@ using namespace std;
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
 #define TARGET_DIFFICULTY 0x00000FFF
-#define NUM_OF_THREADS 256
+#define NUM_OF_THREADS 1
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -21,13 +21,10 @@ typedef struct {
 
 __global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
-    uint32_t nonce;
-    const int blockSize = sizeof(Block) - sizeof(uint32_t);
-    char* blockPtr;
+    uint32_t nonce, new_nonce;
+    const int blockSize = sizeof(uint32_t) + sizeof(char)*TXT_BLOCK_SIZE;
+    char* blockPtr = (char*) block;
     __shared__ int foundFlag;
-
-    cudaMalloc((void**) &blockPtr, sizeof(Block));
-    cudaMemcpy(blockPtr, (void*) block, sizeof(Block), cudaMemcpyDeviceToDevice);
 
     if (threadId == 0) {
         foundFlag = 0;
@@ -38,12 +35,19 @@ __global__ void fnvKernel(Block* block) {
 
     for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
         unsigned int hash = OFFSET;
-        ((Block*)blockPtr)->nonce = nonce;
 
-        // Aplica la función fnv al bloque
+        // Aplica la función fnv a la primera parte del bloque
         for (int i = 0; i < blockSize; ++i) {
             hash ^= *(blockPtr + i);
             hash *= FNV_PRIME;
+        }
+
+        // Hasheo de los bytes de la variable int nonce
+        new_nonce = nonce;
+        for (size_t i = 0; i < sizeof(int); ++i) {
+            hash ^= (uint8_t)(new_nonce & 0xFF);
+            hash *= FNV_PRIME;
+            new_nonce >>= 8; // Desplazamos 8 bits para procesar el siguiente byte
         }
 
         if (hash <= TARGET_DIFFICULTY) {
@@ -55,8 +59,6 @@ __global__ void fnvKernel(Block* block) {
         }
         
     }
-
-    cudaFree(blockPtr);
 
 }
 
