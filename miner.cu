@@ -10,7 +10,7 @@ using namespace std;
 #define PRIME  1000000007
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
-#define TARGET_DIFFICULTY (int) 0.5*PRIME
+#define TARGET_DIFFICULTY (int) 0.8*PRIME
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -24,6 +24,7 @@ __global__ void fnvKernel(Block* block, size_t blockSize) {
     int nonce = 0;
     
     unsigned int hash = OFFSET;
+    printf("Target difficulty: %d\n", TARGET_DIFFICULTY);
 
     do {
         printf("Trying nonce %d\n", nonce);
@@ -33,6 +34,7 @@ __global__ void fnvKernel(Block* block, size_t blockSize) {
             hash *= FNV_PRIME;
         }
         hash %= PRIME;
+        printf("Hash: %d\n\n", hash);
     } while (hash > TARGET_DIFFICULTY && ++nonce);
 
     block->nonce = nonce;
