@@ -101,6 +101,8 @@ int main(int argc, char *argv[]) {
     uint32_t prevBlockHash = 0;
     Block *currentBlock, *deviceBlock;
     struct timeval t1, t2;
+    double t_total;
+
 
     if (argc < 2) {
         printf("Usage: %s <text file> \n", argv[0]);
