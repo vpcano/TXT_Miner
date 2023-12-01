@@ -22,6 +22,7 @@ __global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
     int nonce = 0;
     const int blockSize = sizeof(Block) - sizeof(uint32_t);
+    const char* blockPtr = (char*) block;
     
     unsigned int hash = OFFSET;
 
@@ -29,7 +30,7 @@ __global__ void fnvKernel(Block* block) {
         printf("Trying nonce %d\n", nonce);
         // Aplica la función fnv al campo 'text' de la estructura
         for (int i = 0; i < blockSize; ++i) {
-            hash ^= (unsigned char) *(block + i);
+            hash ^= *(blockPtr + i);
             hash *= FNV_PRIME;
         }
         printf("Hash: %d\n\n", hash);
