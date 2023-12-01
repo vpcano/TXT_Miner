@@ -1,9 +1,11 @@
 {
     "files.associations": {
+        "*.embeddedhtml": "html",
         "string": "cpp",
         "vector": "cpp",
         "memory": "cpp",
         "string_view": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "cstdint": "cpp"
     }
 }

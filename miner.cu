@@ -23,8 +23,11 @@ __global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
     uint32_t nonce;
     const int blockSize = sizeof(Block) - sizeof(uint32_t);
-    const char* blockPtr = (char*) block;
+    char* blockPtr;
     __shared__ int foundFlag;
+
+    cudaMalloc((void**) &blockPtr, sizeof(Block));
+    cudaMemcpy(blockPtr, (void*) block, sizeof(Block), cudaMemcpyDeviceToDevice);
 
     if (threadId == 0) {
         foundFlag = 0;
@@ -35,7 +38,7 @@ __global__ void fnvKernel(Block* block) {
 
     for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
         unsigned int hash = OFFSET;
-        block->nonce = nonce;
+        ((Block*)blockPtr)->nonce = nonce;
 
         // Aplica la función fnv al bloque
         for (int i = 0; i < blockSize; ++i) {
@@ -47,10 +50,13 @@ __global__ void fnvKernel(Block* block) {
             foundFlag = 1;
             printf("Found hash: 0x%08x after %u tries\n", hash, nonce);
 
+            block->nonce = nonce;
             block->blockHash = hash;
         }
         
     }
+
+    cudaFree(blockPtr);
 
 }
 
