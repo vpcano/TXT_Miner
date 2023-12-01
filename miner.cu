@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     }
 
     const char* fileName = argv[1];
-    FILE* file = fopen(fileName, "r");
+    FILE* file = fopen(fileName, "rb");
 
     if (!file) {
         fprintf(stderr, "No se pudo abrir el archivo %s\n", fileName);
