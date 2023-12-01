@@ -45,9 +45,8 @@ __global__ void fnvKernel(Block* block) {
         // Hasheo de los bytes del nonce
         new_nonce = nonce;
         for (size_t i = 0; i < sizeof(int); ++i) {
-            hash ^= (uint8_t)(new_nonce & 0xFF);
+            hash ^= *((char*)&new_nonce + i);
             hash *= FNV_PRIME;
-            new_nonce >>= 8; // Desplazamos 8 bits para procesar el siguiente byte
         }
 
         if (hash <= TARGET_DIFFICULTY) {
