@@ -34,7 +34,7 @@ __global__ void fnvKernel(Block* block) {
     
 
     for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
-        unsigned int hash = OFFSET;
+        uint32_t hash = OFFSET;
 
         // Aplica la función fnv a la primera parte del bloque
         for (int i = 0; i < blockSize; ++i) {
@@ -150,8 +150,18 @@ int main(int argc, char *argv[]) {
         // Copiar el bloque minado del Device al Host
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
         cudaFree(deviceBlock);
-        
+
         printBlock(*currentBlock);
+
+        // Aplica la función fnv a la primera parte del bloque
+        char *blockPtr = (char*) currentBlock;
+        uint32_t hash = OFFSET;
+        for (int i = 0; i < sizeof(Block) - sizeof(uint32_t); ++i) {
+            hash ^= *(blockPtr + i);
+            hash *= FNV_PRIME;
+        }
+        printf("Check hash: 0x%08x\n", hash);
+
         prevBlockHash = currentBlock->blockHash;
         free(currentBlock);
 
