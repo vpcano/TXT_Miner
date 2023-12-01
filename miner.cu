@@ -47,7 +47,7 @@ __global__ void fnvKernel(Block* block) {
             hash *= FNV_PRIME;
         }
 
-        if (hash <= TARGET_DIFFICULTY) {
+        if (hash <= TARGET_DIFFICULTY && !foundFlag) {
             foundFlag = 1;
             printf("Soy el hilo %d y he encontrado esto. Found hash: 0x%08x with nonce %u\n", threadId, hash, nonce);
 
