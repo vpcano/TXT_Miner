@@ -15,13 +15,13 @@ using namespace std;
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
     char text[TXT_BLOCK_SIZE];  // Texto
-    uint32_t nonce;  // Nonce
+    int nonce;  // Nonce
     uint32_t blockHash;  // Hash del bloque (puedes ajustar la longitud según tu método de hash)
 } Block;
 
 __global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
-    uint32_t nonce;
+    int nonce;
     const int blockSize = sizeof(Block) - sizeof(uint32_t);
     const char* blockPtr = (char*) block;
     __shared__ int foundFlag;
@@ -34,7 +34,7 @@ __global__ void fnvKernel(Block* block) {
     
     unsigned int hash = OFFSET;
 
-    for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
+    for (nonce=threadId; !foundFlag; nonce+=NUM_OF_THREADS) {
         // Aplica la función fnv al bloque
         for (int i = 0; i < blockSize; ++i) {
             hash ^= *(blockPtr + i);
@@ -79,7 +79,7 @@ void printBlock(Block block) {
         ++j;
     }
     printf("... |\n|---------------------|\n");
-    printf("|%*s%d%*s|\n", spaces, "", block.nonce, spaces, "");
+    printf("|%*s%u%*s|\n", spaces, "", block.nonce, spaces, "");
     printf("|---------------------|\n");
     printf("|     0x%08x      |\n", block.blockHash);
     printf("+---------------------+\n");
