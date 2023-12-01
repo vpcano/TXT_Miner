@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
         size_t blockSize = (i == n_blocks - 1) ? (fileSize % TXT_BLOCK_SIZE) : TXT_BLOCK_SIZE;
 
         // Leer el contenido del bloque actual
-        fileData = {0};
+        memset(fileData, 0, TXT_BLOCK_SIZE);
         fread(fileData, sizeof(char), blockSize, file);
 
         // Crear el bloque a procesar en la memoria del Host
