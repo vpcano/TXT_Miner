@@ -94,6 +94,8 @@ int main(int argc, char *argv[]) {
 
     int n_blocks = (TXT_BLOCK_SIZE + fileSize - 1) / TXT_BLOCK_SIZE;
 
+    printf("Num blocks: %d\nFile size: %d\n", n_blocks, fileSize);
+
     for (int i=0; i < n_blocks; i++) {
         // Leer el contenido de parte del archivo a una cadena en la memoria del host
         //fread(fileData, sizeof(char), TXT_BLOCK_SIZE, file + n_blocks*TXT_BLOCK_SIZE);
