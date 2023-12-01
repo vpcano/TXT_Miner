@@ -26,6 +26,7 @@ __global__ void fnvKernel(Block* block, size_t blockSize) {
     unsigned int hash = OFFSET;
 
     do {
+        printf("Trying nonce %d\n", nonce);
         // Aplica la función fnv al campo 'text' de la estructura
         for (int i = 0; i < blockSize; ++i) {
             hash ^= static_cast<unsigned int>(block->text[i]);
