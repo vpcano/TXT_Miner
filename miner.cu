@@ -124,7 +124,8 @@ int main(int argc, char *argv[]) {
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
         cudaFree(deviceBlock);
         
-        printBlock(*currentBlock);
+        //printBlock(*currentBlock);
+        print("%s\n\n", currentBlock->text);
         prevBlockHash = currentBlock->blockHash;
         free(currentBlock);
 
