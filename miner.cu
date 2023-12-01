@@ -10,7 +10,7 @@ using namespace std;
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
 #define TARGET_DIFFICULTY 0x000000FF
-#define NUM_OF_THREADS 128
+#define DEFAULT_NUM_OF_THREADS 128
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -32,7 +32,7 @@ __global__ void fnvKernel(Block* block) {
 
     __syncthreads();
     
-    for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
+    for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=blockDim.x) {
         hash = OFFSET;
 
         // Aplica la función fnv a la primera parte del bloque
@@ -102,11 +102,18 @@ int main(int argc, char *argv[]) {
     Block *currentBlock, *deviceBlock;
     struct timeval t1, t2;
     double t_total;
+    int n_threads;
 
 
     if (argc < 2) {
-        printf("Usage: %s <text file> \n", argv[0]);
+        printf("Usage: %s <text_file> [number_of_threads(default=128)] \n", argv[0]);
         return -1;
+    }
+    
+    if (argc > 2) {
+        n_threads = atoi(argv[2]);
+    } else {
+        n_threads = DEFAULT_NUM_OF_THREADS;
     }
 
     const char* fileName = argv[1];
@@ -150,7 +157,7 @@ int main(int argc, char *argv[]) {
         cudaMemcpy(deviceBlock, currentBlock, sizeof(Block), cudaMemcpyHostToDevice);
         
         // Lanza el kernel
-        fnvKernel<<<1, NUM_OF_THREADS>>>(deviceBlock);
+        fnvKernel<<<1, n_threads>>>(deviceBlock);
 
         // Copiar el bloque minado del Device al Host
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
@@ -175,7 +182,7 @@ int main(int argc, char *argv[]) {
 
     gettimeofday(&t2, NULL);
     t_total = (t2.tv_sec - t1.tv_sec)*1000000.0 + (t2.tv_usec - t1.tv_usec);
-    printf("Número de hilos: %d\nTiempo total transcurrido: %f\n", NUM_OF_THREADS, t_total);
+    printf("Número de hilos: %d\nTiempo total transcurrido: %f\n", n_threads, t_total);
 
     fclose(file);
 
