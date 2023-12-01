@@ -21,9 +21,9 @@ typedef struct {
 
 __global__ void fnvKernel(Block* block) {
     int threadId = blockIdx.x * blockDim.x + threadIdx.x;
-    uint32_t nonce, new_nonce;
-    const int blockSize = sizeof(uint32_t) + sizeof(char)*TXT_BLOCK_SIZE;
-    char* blockPtr = (char*) block;
+    uint32_t nonce, hash;
+    const size_t blockSize = sizeof(uint32_t) + sizeof(char)*TXT_BLOCK_SIZE;
+    size_t i;
     __shared__ int foundFlag;
 
     if (threadId == 0) {
@@ -32,20 +32,18 @@ __global__ void fnvKernel(Block* block) {
 
     __syncthreads();
     
-
     for (nonce=threadId; nonce<UINT32_MAX && !foundFlag; nonce+=NUM_OF_THREADS) {
-        uint32_t hash = OFFSET;
+        hash = OFFSET;
 
         // Aplica la función fnv a la primera parte del bloque
-        for (int i = 0; i < blockSize; ++i) {
-            hash ^= *(blockPtr + i);
+        for (i = 0; i < blockSize; ++i) {
+            hash ^= *((char*)block + i);
             hash *= FNV_PRIME;
         }
 
         // Hasheo de los bytes del nonce
-        new_nonce = nonce;
-        for (size_t i = 0; i < sizeof(int); ++i) {
-            hash ^= *((char*)&new_nonce + i);
+        for (i = 0; i < sizeof(uint32_t); ++i) {
+            hash ^= *((char*)&nonce + i);
             hash *= FNV_PRIME;
         }
 
