@@ -10,7 +10,7 @@ using namespace std;
 #define FNV_PRIME 16777619
 #define OFFSET 2166136261
 #define TARGET_DIFFICULTY 0x000000FF
-#define NUM_OF_THREADS 64
+#define NUM_OF_THREADS 128
 
 typedef struct {
     uint32_t prevHash;  // Hash del bloque anterior
@@ -49,7 +49,7 @@ __global__ void fnvKernel(Block* block) {
 
         if (hash <= TARGET_DIFFICULTY && !foundFlag) {
             atomicExch(&foundFlag, 1);
-            printf("Soy el hilo %d y he encontrado esto. Found hash: 0x%08x with nonce %u\n", threadId, hash, nonce);
+            printf("Thread nº %d found hash 0x%08x with nonce %u\n", threadId, hash, nonce);
 
             block->nonce = nonce;
             block->blockHash = hash;
@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
     char fileData[TXT_BLOCK_SIZE];
     uint32_t prevBlockHash = 0;
     Block *currentBlock, *deviceBlock;
+    struct timeval t1, t2;
 
     if (argc < 2) {
         printf("Usage: %s <text file> \n", argv[0]);
@@ -121,6 +122,8 @@ int main(int argc, char *argv[]) {
 
     int n_blocks = (TXT_BLOCK_SIZE + fileSize - 1) / TXT_BLOCK_SIZE;
 
+    gettimeofday(&t1, NULL);
+
     for (int i=0; i < n_blocks; i++) {
 
         // Calcular el tamaño del bloque actual
@@ -138,8 +141,10 @@ int main(int argc, char *argv[]) {
         currentBlock->blockHash = 0;
 
 
-        // Copiar el bloque a la memoria del Device
         cudaMalloc((void**) &deviceBlock, sizeof(Block));
+
+
+        // Copiar el bloque a la memoria del Device
         cudaMemcpy(deviceBlock, currentBlock, sizeof(Block), cudaMemcpyHostToDevice);
         
         // Lanza el kernel
@@ -165,6 +170,10 @@ int main(int argc, char *argv[]) {
         free(currentBlock);
 
     }
+
+    gettimeofday(&t2, NULL);
+    t_total = (t2.tv_sec - t1.tv_sec)*1000000.0 + (t2.tv_usec - t1.tv_usec);
+    printf("Número de hilos: %d\nTiempo total transcurrido: %f\n", NUM_OF_THREADS, t_total);
 
     fclose(file);
 
