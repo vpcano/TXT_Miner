@@ -103,7 +103,8 @@ int main(int argc, char *argv[]) {
     double t_total;
     int n_threads = DEFAULT_NUM_OF_THREADS, n_blocks;
     short overwrite = 0, verbose = 0;
-    char *fileName = NULL, *outputFile = "blockchain.bin", fileData[TXT_BLOCK_SIZE];
+    const char *defaultOutputFile = "blockchain.bin";
+    char *fileName = NULL, *outputFile = NULL, fileData[TXT_BLOCK_SIZE];
     size_t fileSize, blockSize;
     FILE *file, *outFile;
 
@@ -149,6 +150,9 @@ int main(int argc, char *argv[]) {
     fileSize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
+    if (outputFile == NULL) {
+        outputFile = defaultOutputFile;
+    }
     outFile = fopen(outputFile, overwrite ? "w+b" : "a+b");
     if (!outFile) {
         fprintf(stderr, "Error: can't open file %s\n", outputFile);
