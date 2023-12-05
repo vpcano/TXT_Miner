@@ -166,8 +166,10 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
         fseek(outFile, outFileSize - sizeof(Block), SEEK_SET);
+        currentBlock = (Block*) malloc(sizeof(Block));
         fread(currentBlock, sizeof(Block), 1, outFile);
         prevBlockHash = currentBlock->blockHash;
+        free(currentBlock);
         fseek(outFile, 0, SEEK_END);
     }
 
