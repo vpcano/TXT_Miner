@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
 
     gettimeofday(&t2, NULL);
     t_total = (t2.tv_sec - t1.tv_sec)*1000000.0 + (t2.tv_usec - t1.tv_usec);
-    printf("Número de hilos: %d\nTiempo total transcurrido: %f\n", n_threads, t_total);
+    printf("Numero de hilos: %d\tTiempo total: %f\n", n_threads, t_total);
 
     fclose(file);
     fclose(outFile);
