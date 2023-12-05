@@ -151,11 +151,12 @@ int main(int argc, char *argv[]) {
     fseek(file, 0, SEEK_SET);
 
     if (outputFile == NULL) {
-        outputFile = defaultOutputFile;
+        outFile = fopen(defaultOutputFile, overwrite ? "w+b" : "a+b");
+    else {
+        outFile = fopen(outputFile, overwrite ? "w+b" : "a+b");
     }
-    outFile = fopen(outputFile, overwrite ? "w+b" : "a+b");
     if (!outFile) {
-        fprintf(stderr, "Error: can't open file %s\n", outputFile);
+        fprintf(stderr, "Error: can't open output file\n");
         fclose(file);
         exit(EXIT_FAILURE);
     }
