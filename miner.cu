@@ -49,7 +49,7 @@ __global__ void fnvKernel(Block* block) {
 
         if (hash <= TARGET_DIFFICULTY && !foundFlag) {
             atomicExch(&foundFlag, 1);
-            printf("Thread nº %d found hash 0x%08x with nonce %u\n", threadId, hash, nonce);
+            //printf("Thread nº %d found hash 0x%08x with nonce %u\n", threadId, hash, nonce);
 
             block->nonce = nonce;
             block->blockHash = hash;
@@ -101,29 +101,32 @@ int main(int argc, char *argv[]) {
     Block *currentBlock, *deviceBlock;
     struct timeval t1, t2;
     double t_total;
-    int n_threads = DEFAULT_NUM_OF_THREADS, overwrite = 0, n_blocks;
+    int n_threads = DEFAULT_NUM_OF_THREADS, n_blocks;
+    short overwrite = 0, verbose = 0;
     char *fileName = NULL, *outputFile = "blockchain.bin", fileData[TXT_BLOCK_SIZE];
     size_t fileSize, blockSize;
     FILE *file, *outFile;
 
-    // Parse arguments
+    // Parseo de los argumentos
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--overwrite") == 0) {
             overwrite = 1;
+        } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
+            verbose = 1;
         } else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--num_of_threads") == 0) {
             if (i + 1 < argc) {
                 n_threads = atoi(argv[++i]);
                 if (n_threads > 0) continue;
             }
             fprintf(stderr, "Error: expected positive integer value after -n/--num_of_threads.\n");
-            fprintf(stderr, "Usage: %s <text_file> [-n/--num_of_threads number_of_threads(default=%u)] [-f/--output_file output_file(default=blockchain.bin)] [-o/--overwrite] \n", argv[0], DEFAULT_NUM_OF_THREADS);
+            fprintf(stderr, "Usage: %s <text_file> [-n/--num_of_threads number_of_threads(default=%u)] [-f/--output_file output_file(default=blockchain.bin)] [-o/--overwrite] [-v/--verbose]\n", argv[0], DEFAULT_NUM_OF_THREADS);
             exit(EXIT_FAILURE);
         } else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--output_file") == 0) {
             if (i + 1 < argc) {
                 outputFile = argv[++i];
             } else {
                 fprintf(stderr, "Error: expected file name after -f/--output_file.\n");
-                fprintf(stderr, "Usage: %s <text_file> [-n/--num_of_threads number_of_threads(default=%u)] [-f/--output_file output_file(default=blockchain.bin)] [-o/--overwrite] \n", argv[0], DEFAULT_NUM_OF_THREADS);
+                fprintf(stderr, "Usage: %s <text_file> [-n/--num_of_threads number_of_threads(default=%u)] [-f/--output_file output_file(default=blockchain.bin)] [-o/--overwrite] [-v/--verbose]\n", argv[0], DEFAULT_NUM_OF_THREADS);
                 exit(EXIT_FAILURE);
             }
         } else {
@@ -133,7 +136,7 @@ int main(int argc, char *argv[]) {
 
     if (fileName == NULL) {
         fprintf(stderr, "Error: expected input file\n");
-        fprintf(stderr, "Usage: %s <text_file> [-n/--num_of_threads number_of_threads(default=%u)] [-f/--output_file output_file(default=blockchain.bin)] [-o/--overwrite] \n", argv[0], DEFAULT_NUM_OF_THREADS);
+        fprintf(stderr, "Usage: %s <text_file> [-n/--num_of_threads number_of_threads(default=%u)] [-f/--output_file output_file(default=blockchain.bin)] [-o/--overwrite] [-v/--verbose]\n", argv[0], DEFAULT_NUM_OF_THREADS);
         exit(EXIT_FAILURE);
     }
     file = fopen(fileName, "rb");
@@ -149,7 +152,23 @@ int main(int argc, char *argv[]) {
     outFile = fopen(outputFile, overwrite ? "w+b" : "a+b");
     if (!outFile) {
         fprintf(stderr, "Error: can't open file %s\n", outputFile);
+        fclose(file);
         exit(EXIT_FAILURE);
+    }
+    // Si no se ha especificado la opcion de sobreescribir, se obtiene el hash del ultimo bloque
+    if (!overwrite) {
+        fseek(outFile, 0, SEEK_END);
+        int outFileSize = ftell(outFile);
+        if (outFileSize < sizeof(Block)) {
+            fprintf(stderr, "Error: file %s is corrupted\n", outputFile);
+            fclose(file);
+            fclose(outFile);
+            exit(EXIT_FAILURE);
+        }
+        fseek(outFile, outFileSize - sizeof(Block), SEEK_SET);
+        fread(currentBlock, sizeof(Block), 1, outFile);
+        prevBlockHash = currentBlock->blockHash;
+        fseek(outFile, 0, SEEK_END);
     }
 
     n_blocks = (TXT_BLOCK_SIZE + fileSize - 1) / TXT_BLOCK_SIZE;
@@ -186,7 +205,9 @@ int main(int argc, char *argv[]) {
         cudaMemcpy(currentBlock, deviceBlock, sizeof(Block), cudaMemcpyDeviceToHost);
         cudaFree(deviceBlock);
 
-        printBlock(*currentBlock);
+        if (verbose) {
+            printBlock(*currentBlock);
+        }
 
         // Check hash has been calculated correctly
         /*
