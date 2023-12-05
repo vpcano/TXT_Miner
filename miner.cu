@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
 
     if (outputFile == NULL) {
         outFile = fopen(defaultOutputFile, overwrite ? "w+b" : "a+b");
+    }
     else {
         outFile = fopen(outputFile, overwrite ? "w+b" : "a+b");
     }
